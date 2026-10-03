@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       				OCS 网课助手
-// @version    				4.12.37-bg1
-// @description				OCS(online-course-script) 网课助手（后台播放增强版），官网 https://docs.ocsjs.com ，专注于帮助大学生从网课中释放出来 让自己的时间把握在自己的手中，拥有人性化的操作页面，流畅的步骤提示，支持  【超星学习通】 【知到智慧树】 【职教云】 【智慧职教】 【中国大学MOOC】 等网课的学习，作业。具体的功能请查看脚本悬浮窗中的教程页面。
+// @version    				4.12.37-bg2
+// @description				OCS(online-course-script) 网课助手（后台播放增强 + 自动提交增强版），官网 https://docs.ocsjs.com ，专注于帮助大学生从网课中释放出来 让自己的时间把握在自己的手中，拥有人性化的操作页面，流畅的步骤提示，支持  【超星学习通】 【知到智慧树】 【职教云】 【智慧职教】 【中国大学MOOC】 等网课的学习，作业。具体的功能请查看脚本悬浮窗中的教程页面。
 // @author     				enncy
 // @license    				MIT
 // @match      				*://*.zhihuishu.com/*
@@ -11941,7 +11941,8 @@ ${content}</tr>
         }
         modal2 == null ? void 0 : modal2.remove();
       }
-      lib.$message.info({ content: "作业/考试完成，请自行检查后保存或提交。", duration: 0 });
+      await autoSubmitWithVerification({ label: "答题任务" });
+      lib.$message.info({ content: "答题流程完成，已执行自动提交并进行结果校验。", duration: 5 });
       worker.emit("done");
     }).catch((err) => {
       lib.$message.error({ content: "答题程序发生错误 : " + err.message, duration: 0 });
@@ -12031,7 +12032,8 @@ ${content}</tr>
         next2 == null ? void 0 : next2.click();
         await lib.$.sleep(1e3);
       }
-      lib.$message.info({ content: "作业/考试完成，请自行检查后保存或提交。", duration: 0 });
+      await autoSubmitWithVerification({ label: "答题任务" });
+      lib.$message.info({ content: "答题流程完成，已执行自动提交并进行结果校验。", duration: 5 });
       worker.emit("done");
       CommonProject.scripts.workResults.cfg.questionPositionSyncHandlerType = "zhs-xnk";
     })();
@@ -12167,9 +12169,10 @@ ${content}</tr>
         await lib.$.sleep(1e3);
         count++;
       }
+      await autoSubmitWithVerification({ label: "答题任务" });
       lib.$message.info({
-        content: "作业/考试完成，请自行检查后保存或提交。",
-        duration: count > 10 ? 0 : 30
+        content: "答题流程完成，已执行自动提交并进行结果校验。",
+        duration: 5
       });
       worker.emit("done");
       CommonProject.scripts.workResults.cfg.questionPositionSyncHandlerType = "zhs-smart";
@@ -12296,9 +12299,10 @@ ${content}</tr>
         await lib.$.sleep(1e3);
         count++;
       }
+      await autoSubmitWithVerification({ label: "答题任务" });
       lib.$message.info({
-        content: "作业/考试完成，请自行检查后保存或提交。",
-        duration: count > 10 ? 0 : 30
+        content: "答题流程完成，已执行自动提交并进行结果校验。",
+        duration: 5
       });
       worker.emit("done");
       CommonProject.scripts.workResults.cfg.questionPositionSyncHandlerType = "zhs-smart";
@@ -12389,9 +12393,13 @@ ${content}</tr>
       if (worker.isClose === true) {
         return;
       }
+      const submitConfirmed = await autoSubmitWithVerification({ label: "答题任务" });
+      if (!submitConfirmed) {
+        $console.warn("[OCS自动提交] 答题完成，但暂未确认提交成功");
+      }
       lib.$message.info({
-        content: "作业/考试完成，请自行检查后保存或提交。",
-        duration: res.length > 10 ? 0 : 30
+        content: submitConfirmed ? "答题流程完成，已执行自动提交并进行结果校验。" : "答题完成，但暂未确认提交成功，请检查页面。",
+        duration: 5
       });
       worker.emit("done");
     }).catch((err) => {
@@ -12501,7 +12509,8 @@ ${content}</tr>
           count++;
         }
       }
-      lib.$message.info({ content: "作业/考试完成，请自行检查后保存或提交。", duration: count > 10 ? 0 : 30 });
+      await autoSubmitWithVerification({ label: "答题任务" });
+      lib.$message.info({ content: "答题流程完成，已执行自动提交并进行结果校验。", duration: 5 });
       worker.emit("done");
       CommonProject.scripts.workResults.cfg.questionPositionSyncHandlerType = "zhs-hike";
     })();
@@ -12580,8 +12589,9 @@ ${content}</tr>
         CommonProject.scripts.workResults.methods.updateWorkStateByResults(res);
       }
     });
-    worker.doWork({ enable_debug: BackgroundProject.scripts.dev.cfg.enable_answerer_debug }).then(() => {
-      lib.$message.info({ content: "作业/考试完成，请自行检查后保存或提交。", duration: 0 });
+    worker.doWork({ enable_debug: BackgroundProject.scripts.dev.cfg.enable_answerer_debug }).then(async () => {
+      await autoSubmitWithVerification({ label: "答题任务" });
+      lib.$message.info({ content: "答题流程完成，已执行自动提交并进行结果校验。", duration: 5 });
       worker.emit("done");
       CommonProject.scripts.workResults.cfg.questionPositionSyncHandlerType = "zhs-hike";
     });
@@ -16021,7 +16031,8 @@ ${content}</tr>
           next2 == null ? void 0 : next2.click();
           await $.sleep(1e3);
         }
-        lib.$message.success({ content: "作业/考试完成，请自行检查后保存或提交。", duration: 0 });
+        await autoSubmitWithVerification({ label: "答题任务" });
+        lib.$message.success({ content: "答题流程完成，已执行自动提交并进行结果校验。", duration: 5 });
         worker.emit("done");
         CommonProject.scripts.workResults.cfg.questionPositionSyncHandlerType = "cx";
       })();
@@ -16816,10 +16827,35 @@ ${content}</tr>
           lib.$message.success({ content: msg22, duration: 3 });
           await $.sleep(3e3);
           if (uploadable) {
-            frameWindow.btnBlueSubmit();
-            await $.sleep(3e3);
-            frameWindow.submitCheckTimes();
-            top$1.$("#workpop").hide();
+            // 原脚本这里只调用一次 btnBlueSubmit；改为提交 + 校验 + 失败重试。
+            let submitConfirmed = false;
+            for (let submitTry = 1; submitTry <= 4 && !submitConfirmed; submitTry++) {
+              try {
+                frameWindow.btnBlueSubmit();
+              } catch (e) {
+                $console.warn(`[OCS自动提交] 第 ${submitTry} 次调用 btnBlueSubmit 失败：`, e);
+              }
+              await $.sleep(1200);
+              try {
+                frameWindow.submitCheckTimes();
+              } catch (e) {
+                $console.warn(`[OCS自动提交] 第 ${submitTry} 次调用 submitCheckTimes 失败：`, e);
+              }
+              await $.sleep(1200);
+              const workpop = top$1.$("#workpop");
+              const hidden = !workpop || workpop.css("display") === "none" || workpop.is(":hidden");
+              const pageText = String((document.body == null ? void 0 : document.body.innerText) || "").replace(/\s+/g, "");
+              submitConfirmed = hidden || /提交成功|交卷成功|已提交|提交完成/.test(pageText);
+              if (!submitConfirmed && submitTry < 4) {
+                $console.warn(`[OCS自动提交] 尚未确认提交成功，准备第 ${submitTry + 1} 次重试`);
+              }
+            }
+            if (submitConfirmed) {
+              top$1.$("#workpop").hide();
+              lib.$message.success({ content: "已检测到提交完成。", duration: 3 });
+            } else {
+              lib.$message.error({ content: "已尝试多次提交，但暂未确认成功，请检查提交状态。", duration: 0 });
+            }
           } else {
             frameWindow.alert = () => {
             };
@@ -17750,7 +17786,8 @@ ${content}</tr>
           await $.sleep(1e3);
         }
       }
-      lib.$message.success({ content: "作业/考试完成，请自行检查后保存或提交。", duration: 0 });
+      await autoSubmitWithVerification({ label: "答题任务" });
+      lib.$message.success({ content: "答题流程完成，已执行自动提交并进行结果校验。", duration: 5 });
       worker.emit("done");
       CommonProject.scripts.workResults.cfg.questionPositionSyncHandlerType = "icve";
     })();
@@ -17863,7 +17900,8 @@ ${content}</tr>
           await $.sleep(1e3);
         }
       }
-      lib.$message.success({ content: "作业/考试完成，请自行检查后保存或提交。", duration: 0 });
+      await autoSubmitWithVerification({ label: "答题任务" });
+      lib.$message.success({ content: "答题流程完成，已执行自动提交并进行结果校验。", duration: 5 });
       worker.emit("done");
       CommonProject.scripts.workResults.cfg.questionPositionSyncHandlerType = "icve";
     })();
@@ -18485,14 +18523,200 @@ ${content}</tr>
         CommonProject.scripts.workResults.methods.updateWorkStateByResults(res);
       }
     });
-    worker.doWork({ enable_debug: BackgroundProject.scripts.dev.cfg.enable_answerer_debug }).then(() => {
-      lib.$message.info({ content: "作业/考试完成，请自行检查后保存或提交。", duration: 0 });
+    worker.doWork({ enable_debug: BackgroundProject.scripts.dev.cfg.enable_answerer_debug }).then(async () => {
+      await autoSubmitWithVerification({ label: "答题任务" });
+      lib.$message.info({ content: "答题流程完成，已执行自动提交并进行结果校验。", duration: 5 });
       worker.emit("done");
     }).catch((err) => {
       lib.$message.error({ content: `作业/考试失败: ${err}`, duration: 0 });
     });
     return worker;
   }
+  // ===== 后台增强版：作业/考试自动提交与提交结果校验 =====
+  // 设计目标：答题流程完成后，不再只“点一次提交按钮就结束”，而是：
+  // 1) 等待真正可点击的“提交/交卷”按钮出现；
+  // 2) 执行真实 DOM 点击；
+  // 3) 自动处理常见“确认提交/确认交卷”弹窗；
+  // 4) 根据“提交成功/已提交/交卷成功”等状态或提交按钮状态判断结果；
+  // 5) 未确认成功时重新寻找按钮并重试，避免一次点击失效导致作业停在未提交状态。
+  let __ocsAutoSubmitDone = false;
+  let __ocsAutoSubmitPromise = null;
+
+  function __ocsIsVisible(el) {
+    if (!el || !(el instanceof Element) || !el.isConnected) return false;
+    const style = window.getComputedStyle(el);
+    const rect = el.getBoundingClientRect();
+    return style.display !== "none" && style.visibility !== "hidden" &&
+      parseFloat(style.opacity || "1") > 0 && rect.width > 0 && rect.height > 0;
+  }
+
+  function __ocsText(el) {
+    return String((el == null ? void 0 : el.innerText) || (el == null ? void 0 : el.textContent) || "")
+      .replace(/\\s+/g, "")
+      .trim();
+  }
+
+  function __ocsHasSubmitSuccessText() {
+    const text = String((document.body == null ? void 0 : document.body.innerText) || "")
+      .replace(/\\s+/g, "")
+      .slice(-30000);
+    return [
+      /提交(?:答案|作业|试卷)?成功/,
+      /交卷成功/,
+      /已(?:经)?提交/,
+      /提交完成/,
+      /交卷完成/,
+      /作业已提交/,
+      /试卷已提交/,
+      /提交成功[！!]?$/
+    ].some((re) => re.test(text));
+  }
+
+  function __ocsGetSubmitCandidates(extraSelectors = []) {
+    const selectors = [
+      ...extraSelectors,
+      ".j-submit",
+      "button[type=submit]",
+      "input[type=submit]",
+      '[class*="submit"]',
+      '[id*="submit"]',
+      '[class*="Submit"]',
+      '[id*="Submit"]',
+      'button,[role="button"],input[type="button"],a'
+    ];
+    const seen = new Set();
+    const out = [];
+    const submitRe = /^(提交|提交答案|提交作业|提交试卷|交卷|立即提交|完成提交|确认提交|提交并结束)([：:：\s]*.*)?$/i;
+    const looseRe = /(提交作业|提交试卷|提交答案|立即提交|确认提交|交卷|提交并结束|提交)/i;
+    for (const selector of selectors) {
+      let nodes = [];
+      try { nodes = Array.from(document.querySelectorAll(selector)); } catch (_) {}
+      for (const el of nodes) {
+        if (seen.has(el) || !__ocsIsVisible(el)) continue;
+        seen.add(el);
+        if (el.disabled || el.getAttribute("aria-disabled") === "true") continue;
+        const text = __ocsText(el);
+        const cls = String(el.className || "");
+        const id = String(el.id || "");
+        const hay = `${text}${cls}${id}`;
+        if (!submitRe.test(text) && !looseRe.test(hay)) continue;
+        if (/(保存|取消|关闭|下一题|上一题|返回|退出|删除|撤销)/.test(text) && !/(提交|交卷)/.test(text)) continue;
+        const score =
+          (submitRe.test(text) ? 100 : 0) +
+          (/submit/i.test(cls + id) ? 30 : 0) +
+          (/(提交|交卷)/.test(text) ? 20 : 0);
+        out.push({ el, score });
+      }
+    }
+    out.sort((a, b) => b.score - a.score);
+    return out.map((x) => x.el);
+  }
+
+  function __ocsGetConfirmCandidates() {
+    const dialogs = Array.from(document.querySelectorAll(
+      '[role="dialog"],.el-dialog,.el-message-box,.ant-modal,.layui-layer,.modal,.dialog'
+    )).filter(__ocsIsVisible);
+    const result = [];
+    for (const dialog of dialogs) {
+      const text = __ocsText(dialog);
+      if (!/(确认|是否|确定|提交|交卷)/.test(text)) continue;
+      const buttons = Array.from(dialog.querySelectorAll(
+        'button,[role="button"],input[type="button"],input[type="submit"],a'
+      )).filter(__ocsIsVisible).filter((el) => {
+        const t = __ocsText(el);
+        return /^(确定|确认|提交|交卷|是|继续|继续提交|确认提交)$/.test(t) || /(提交|交卷)/.test(t);
+      });
+      for (const button of buttons) result.push(button);
+    }
+    return result;
+  }
+
+  async function __ocsClick(el) {
+    if (!el || !__ocsIsVisible(el)) return false;
+    try {
+      el.scrollIntoView({ block: "center", inline: "center" });
+    } catch (_) {}
+    try {
+      el.dispatchEvent(new MouseEvent("mouseover", { bubbles: true, cancelable: true, view: window }));
+      el.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }));
+      el.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }));
+    } catch (_) {}
+    try {
+      el.click();
+      return true;
+    } catch (e) {
+      $console.warn("自动提交点击失败：", e);
+      return false;
+    }
+  }
+
+  async function autoSubmitWithVerification({
+    label = "作业/考试",
+    selectors = [],
+    attempts = 5,
+    waitTimeout = 15e3
+  } = {}) {
+    if (__ocsAutoSubmitDone) return true;
+    if (__ocsAutoSubmitPromise) return __ocsAutoSubmitPromise;
+    __ocsAutoSubmitPromise = (async () => {
+      const start = Date.now();
+      let lastButton = null;
+      for (let attempt = 1; attempt <= attempts && Date.now() - start < waitTimeout * attempts; attempt++) {
+        if (__ocsHasSubmitSuccessText()) {
+          __ocsAutoSubmitDone = true;
+          return true;
+        }
+        let button = __ocsGetSubmitCandidates(selectors)[0];
+        if (!button) {
+          await $.sleep(500);
+          continue;
+        }
+        lastButton = button;
+        $console.info(`[OCS自动提交] ${label}：准备第 ${attempt} 次提交`);
+        await __ocsClick(button);
+
+        // 先给网页自身提交逻辑一点时间，再处理确认弹窗。
+        for (let check = 0; check < 10; check++) {
+          await $.sleep(400);
+          if (__ocsHasSubmitSuccessText()) {
+            __ocsAutoSubmitDone = true;
+            $console.info(`[OCS自动提交] ${label}：检测到提交成功`);
+            return true;
+          }
+          const confirms = __ocsGetConfirmCandidates();
+          if (confirms.length) {
+            await __ocsClick(confirms[0]);
+            await $.sleep(700);
+          }
+          if (__ocsHasSubmitSuccessText()) {
+            __ocsAutoSubmitDone = true;
+            $console.info(`[OCS自动提交] ${label}：确认弹窗处理后提交成功`);
+            return true;
+          }
+          const activeButtons = __ocsGetSubmitCandidates(selectors);
+          const stillActive = activeButtons.some((el) => el === lastButton || __ocsText(el) === __ocsText(lastButton));
+          if (!stillActive && !activeButtons.length) {
+            // 按钮消失通常意味着页面已经进入提交完成状态；再额外观察一次，尽量避免误判。
+            await $.sleep(900);
+            if (__ocsHasSubmitSuccessText() || !__ocsGetSubmitCandidates(selectors).length) {
+              __ocsAutoSubmitDone = true;
+              $console.info(`[OCS自动提交] ${label}：提交按钮已消失，视为提交完成`);
+              return true;
+            }
+          }
+        }
+        await $.sleep(700);
+      }
+      $console.warn(`[OCS自动提交] ${label}：重试后仍未确认提交成功，请检查页面`);
+      return false;
+    })();
+    try {
+      return await __ocsAutoSubmitPromise;
+    } finally {
+      __ocsAutoSubmitPromise = null;
+    }
+  }
+
   const $msg_and_log = (type, msg2) => {
     lib.$message[type](msg2);
     $console[type](msg2);
@@ -18995,17 +19219,21 @@ ${content}</tr>
               return;
             }
             if (uploadable) {
-              const sumbit = document.querySelector(".j-submit");
-              if (sumbit) {
-                await remotePage.click(sumbit);
-              } else {
-                $msg_and_log("warn", "没有找到提交按钮，将跳过提交。");
+              const submitConfirmed = await autoSubmitWithVerification({
+                label: "中国大学MOOC章节测试",
+                selectors: [".j-submit"]
+              });
+              if (!submitConfirmed) {
+                $msg_and_log("warn", "多次尝试后仍未确认提交成功，请检查页面提交状态。");
               }
             }
           }
         });
       } else {
-        lib.$message.success({ content: "作业/考试完成，请自行检查后保存或提交。", duration: 0 });
+        const submitConfirmed = await autoSubmitWithVerification({ label: "中国大学MOOC作业/考试" });
+        if (!submitConfirmed) {
+          $msg_and_log("warn", "答题完成，但暂未确认提交成功，请检查页面提交状态。");
+        }
       }
       worker.emit("done");
     }).catch((err) => {
